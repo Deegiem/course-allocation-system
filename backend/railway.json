@@ -1,19 +1,6 @@
 {
   "build": {
-    "builder": "NIXPACKS",
-    "nixpacks": {
-      "phases": {
-        "setup": {
-          "nixPkgs": ["nodejs_18"]
-        },
-        "install": {
-          "cmds": ["npm install --legacy-peer-deps"]
-        },
-        "build": {
-          "cmds": ["npm run build"]
-        }
-      }
-    }
+    "builder": "DOCKERFILE"
   },
   "deploy": {
     "startCommand": "npm run start",
