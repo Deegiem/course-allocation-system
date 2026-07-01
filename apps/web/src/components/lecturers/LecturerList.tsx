@@ -71,7 +71,7 @@ export default function LecturerList({ onDelete }: LecturerListProps) {
   }
 
   if (error) {
-    return <div className="text-red-500">Error: {error}</div>;
+    return <div className="text-red-500 p-6">Error: {error}</div>;
   }
 
   if (lecturers.length === 0) {
