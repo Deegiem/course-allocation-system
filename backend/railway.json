@@ -1,0 +1,23 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "nixpacks": {
+      "plan": {
+        "phases": {
+          "setup": {
+            "nixPkgs": ["nodejs_18"]
+          },
+          "install": {
+            "cmds": ["npm install --legacy-peer-deps --omit=dev"]
+          },
+          "build": {
+            "cmds": ["npm run build"]
+          },
+          "start": {
+            "cmds": ["npm run start"]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const CourseController_1 = require("../controllers/CourseController");
+const CourseService_1 = require("../../application/services/CourseService");
+const CourseRepository_1 = require("../../infrastructure/repositories/CourseRepository");
+const client_1 = require("@prisma/client");
+const router = (0, express_1.Router)();
+const prisma = new client_1.PrismaClient();
+const courseRepository = new CourseRepository_1.CourseRepository(prisma);
+const courseService = new CourseService_1.CourseService(courseRepository);
+const courseController = new CourseController_1.CourseController(courseService);
+router.get('/', courseController.getAll.bind(courseController));
+router.get('/active', courseController.getActive.bind(courseController));
+router.get('/level/:level', courseController.getByLevel.bind(courseController));
+router.get('/unallocated', courseController.getUnallocated.bind(courseController));
+router.get('/:id', courseController.getById.bind(courseController));
+router.post('/', courseController.create.bind(courseController));
+router.put('/:id', courseController.update.bind(courseController));
+router.delete('/:id', courseController.delete.bind(courseController));
+exports.default = router;
+//# sourceMappingURL=courseRoutes.js.map
