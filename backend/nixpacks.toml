@@ -1,4 +1,3 @@
-
 [build]
 builder = "nixpacks"
 
@@ -6,10 +5,10 @@ builder = "nixpacks"
 nixPkgs = ["nodejs_18"]
 
 [phases.install]
-cmds = ["npm install --legacy-peer-deps --omit=dev"]
+cmds = ["npm install --legacy-peer-deps"]
 
 [phases.build]
 cmds = ["npm run build"]
 
-[phases.start]
+[phases.deploy]
 cmds = ["npm run start"]
