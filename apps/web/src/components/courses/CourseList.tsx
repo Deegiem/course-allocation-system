@@ -183,7 +183,7 @@ export default function CourseList({ filter = 'all' }: CourseListProps) {
 
     <button
       onClick={() => handleDelete(course.id)}
-      title="Delete course" s
+      title="Delete course"
       className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-red-600 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-700 dark:border-gray-700 dark:bg-gray-800 dark:text-red-400 dark:hover:border-red-700 dark:hover:bg-red-900/20"
     >
       <Trash2 size={18} />
