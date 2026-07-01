@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+backend/dist/
+backend/*.tsbuildinfo
+apps/web/.next/
+apps/web/out/
+backend/prisma/*.db
+backend/prisma/migrations/*.db
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Railway
+.railway/
+
+# Vercel
+.vercel/
+
+# Backup files
+*.backup
+*.bak
