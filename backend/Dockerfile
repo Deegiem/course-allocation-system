@@ -17,4 +17,4 @@ RUN npm run build
 EXPOSE 8080
 
 # Run migrations then start the app
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
+CMD ["sh", "-c", "npx prisma db push && npm run start"]
