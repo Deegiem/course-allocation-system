@@ -14,10 +14,18 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://course-allocation-system-eta.vercel.app', // ← Your Vercel URL
+];
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({ origin: 
+  allowedOrigins,
+  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+ }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -52,6 +60,30 @@ app.get('/', (_req, res) => {
       policies: '/api/v1/policies'
     }
   });
+});
+
+// src/app.ts - Add this before the 404 handler
+app.get('/api/debug/routes', (_req, res) => {
+  const routes: string[] = [];
+  
+  const getRoutes = (stack: any[], basePath: string = '') => {
+    for (const layer of stack) {
+      if (layer.route) {
+        const methods = Object.keys(layer.route.methods).join(', ').toUpperCase();
+        routes.push(`${methods} ${basePath}${layer.route.path}`);
+      } else if (layer.name === 'router' && layer.handle.stack) {
+        const routerPath = layer.regexp.source
+          .replace('\\/?(?=\\/|$)', '')
+          .replace(/\\\//g, '/')
+          .replace(/\^/g, '')
+          .replace(/\?/g, '');
+        getRoutes(layer.handle.stack, routerPath);
+      }
+    }
+  };
+  
+  getRoutes(app._router.stack);
+  res.json({ routes: routes.sort() });
 });
 
 // 404 handler - Return JSON instead of HTML

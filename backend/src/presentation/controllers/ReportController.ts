@@ -4,21 +4,36 @@ import PdfPrinter from 'pdfmake';
 
 const prisma = new PrismaClient();
 
-// Configure PDFMake with Helvetica only
+// ============================================================
+// 1. FONTS CONFIGURATION
+// ============================================================
+// For Plus Jakarta Sans, you need to download the font files
+// and place them in your project (e.g., src/assets/fonts/)
+// Download from: https://fonts.google.com/specimen/Plus+Jakarta+Sans
 const fonts = {
   Helvetica: {
     normal: 'Helvetica',
     bold: 'Helvetica-Bold',
     italics: 'Helvetica-Oblique',
     bolditalics: 'Helvetica-BoldOblique'
-  }
+  },
+  // Uncomment this when you have the font files:
+  // PlusJakartaSans: {
+  //   normal: 'src/assets/fonts/PlusJakartaSans-Regular.ttf',
+  //   bold: 'src/assets/fonts/PlusJakartaSans-Bold.ttf',
+  //   italics: 'src/assets/fonts/PlusJakartaSans-Italic.ttf',
+  //   bolditalics: 'src/assets/fonts/PlusJakartaSans-BoldItalic.ttf'
+  // }
 };
+
 const printer = new PdfPrinter(fonts);
 
-// Default font for all text
+// Default font
 const DEFAULT_FONT = 'Helvetica';
 
-// Color Palette
+// ============================================================
+// 2. COLOR PALETTE
+// ============================================================
 const COLORS = {
   primary: '#2563EB',
   primaryLight: '#EFF6FF',
@@ -32,7 +47,9 @@ const COLORS = {
   white: '#FFFFFF',
 };
 
-// Helper: Format date
+// ============================================================
+// 3. HELPERS
+// ============================================================
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', {
@@ -42,7 +59,6 @@ function formatDate(dateString: string): string {
   });
 }
 
-// Helper: Format time
 function formatTime(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleTimeString('en-US', {
@@ -51,7 +67,6 @@ function formatTime(dateString: string): string {
   });
 }
 
-// Helper: Format enum
 function formatEnum(value: string): string {
   if (!value) return '';
   return value
@@ -60,12 +75,10 @@ function formatEnum(value: string): string {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-// Helper: Format status
 function formatStatus(status: string): string {
   return formatEnum(status);
 }
 
-// Helper: Create text with default font
 function t(text: string, options: any = {}): any {
   return {
     text,
@@ -74,7 +87,9 @@ function t(text: string, options: any = {}): any {
   };
 }
 
-// Helper: Create header
+// ============================================================
+// 4. PDF BUILDING BLOCKS
+// ============================================================
 function createHeader(): any {
   return {
     table: {
@@ -83,7 +98,7 @@ function createHeader(): any {
         [
           {
             stack: [
-              t('EDUALLOC', { fontSize: 22, bold: true, color: COLORS.white }),
+              t('EDUALLOC', { fontSize: 26, bold: true, color: COLORS.white }),
               t('Course Allocation Management System', { fontSize: 10, color: COLORS.white }),
             ],
             fillColor: COLORS.primary,
@@ -97,10 +112,9 @@ function createHeader(): any {
   };
 }
 
-// Helper: Create title
 function createReportTitle(title: string): any {
   return t(title, {
-    fontSize: 20,
+    fontSize: 28,
     bold: true,
     color: COLORS.grayDark,
     alignment: 'center',
@@ -108,7 +122,6 @@ function createReportTitle(title: string): any {
   });
 }
 
-// Helper: Create info card
 function createInfoCard(data: {
   generatedAt: string;
   reportType: string;
@@ -152,14 +165,13 @@ function createInfoCard(data: {
       ],
     },
     layout: 'lightHorizontalLines',
-    margin: [0, 0, 0, 16],
+    margin: [0, 0, 0, 19],
   };
 }
 
-// Helper: Create stats cards
 function createStatsCards(stats: { label: string; value: string; color?: string }[]): any {
   const cardWidth = 100 / stats.length;
-  
+
   const body = stats.map(stat => ({
     text: stat.value,
     fontSize: 18,
@@ -202,7 +214,6 @@ function createStatsCards(stats: { label: string; value: string; color?: string 
   };
 }
 
-// Helper: Create table with alternating colors
 function createTable(columns: string[], rows: any[][], columnWidths: string[]): any {
   const headerRow = columns.map(text => ({
     text,
@@ -220,7 +231,7 @@ function createTable(columns: string[], rows: any[][], columnWidths: string[]): 
       widths: columnWidths,
       body: [
         headerRow,
-        ...rows.map((row, rowIndex) => 
+        ...rows.map((row, rowIndex) =>
           row.map(cell => ({
             text: cell,
             fontSize: 9,
@@ -244,7 +255,6 @@ function createTable(columns: string[], rows: any[][], columnWidths: string[]): 
   };
 }
 
-// Helper: Create footer
 function createFooter(currentPage: number, pageCount: number): any {
   return {
     columns: [
@@ -267,11 +277,14 @@ function createFooter(currentPage: number, pageCount: number): any {
   };
 }
 
+// ============================================================
+// 5. REPORT CONTROLLER
+// ============================================================
 export class ReportController {
   async generateAllocationReport(req: Request, res: Response) {
     try {
       const { lecturerId } = req.body;
-      
+
       const whereClause: any = {};
       if (lecturerId) {
         whereClause.lecturerId = parseInt(lecturerId);
@@ -325,6 +338,154 @@ export class ReportController {
     }
   }
 
+  // ============================================================
+  // LECTURER REPORTS (NEW)
+  // ============================================================
+  async generateLecturerReport(req: Request, res: Response) {
+    try {
+      const lecturerId = parseInt(req.params.id);
+
+      const lecturer = await prisma.lecturer.findUnique({
+        where: { id: lecturerId },
+        include: {
+          allocations: {
+            where: {
+              status: { in: ['AUTO_ALLOCATED', 'APPROVED', 'OVERRIDDEN'] }
+            },
+            include: {
+              course: true
+            }
+          }
+        }
+      });
+
+      if (!lecturer) {
+        return res.status(404).json({ success: false, error: 'Lecturer not found' });
+      }
+
+      const totalLoad = lecturer.allocations.reduce((sum, a) => sum + a.course.units, 0);
+      const utilization = lecturer.maxHours > 0 ? Math.round((totalLoad / lecturer.maxHours) * 100) : 0;
+
+      const reportData = {
+        generatedAt: new Date().toISOString(),
+        type: 'lecturer_allocation',
+        lecturer: {
+          name: lecturer.name,
+          staffId: lecturer.staffId,
+          rank: lecturer.rank,
+          email: lecturer.email,
+          specialization: lecturer.specialization,
+        },
+        summary: {
+          totalCourses: lecturer.allocations.length,
+          totalLoad,
+          maxLoad: lecturer.maxHours,
+          utilization,
+        },
+        allocations: lecturer.allocations.map(a => ({
+          courseCode: a.course.code,
+          courseTitle: a.course.title,
+          units: a.course.units,
+          level: a.course.level,
+          nature: a.course.nature,
+          status: a.status,
+        })),
+      };
+
+      const report = await prisma.report.create({
+        data: {
+          generatedBy: 'System',
+          reportType: 'LECTURER_ALLOCATION_REPORT',
+          data: JSON.stringify(reportData)
+        }
+      });
+
+      return res.json({ success: true, data: report });
+    } catch (error) {
+      console.error('Error generating lecturer report:', error);
+      return res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+
+  async generateAllLecturerReports(_req: Request, res: Response) {
+    try {
+      const lecturers = await prisma.lecturer.findMany({
+        where: { isActive: true },
+        include: {
+          allocations: {
+            where: {
+              status: { in: ['AUTO_ALLOCATED', 'APPROVED', 'OVERRIDDEN'] }
+            },
+            include: {
+              course: true
+            }
+          }
+        }
+      });
+
+      const reports = [];
+      for (const lecturer of lecturers) {
+        const totalLoad = lecturer.allocations.reduce((sum, a) => sum + a.course.units, 0);
+        const utilization = lecturer.maxHours > 0 ? Math.round((totalLoad / lecturer.maxHours) * 100) : 0;
+
+        const reportData = {
+          generatedAt: new Date().toISOString(),
+          type: 'lecturer_allocation',
+          lecturer: {
+            name: lecturer.name,
+            staffId: lecturer.staffId,
+            rank: lecturer.rank,
+            email: lecturer.email,
+            specialization: lecturer.specialization,
+          },
+          summary: {
+            totalCourses: lecturer.allocations.length,
+            totalLoad,
+            maxLoad: lecturer.maxHours,
+            utilization,
+          },
+          allocations: lecturer.allocations.map(a => ({
+            courseCode: a.course.code,
+            courseTitle: a.course.title,
+            units: a.course.units,
+            level: a.course.level,
+            nature: a.course.nature,
+            status: a.status,
+          })),
+        };
+
+        const report = await prisma.report.create({
+          data: {
+            generatedBy: 'System',
+            reportType: 'LECTURER_ALLOCATION_REPORT',
+            data: JSON.stringify(reportData)
+          }
+        });
+
+        reports.push({
+          lecturerId: lecturer.id,
+          lecturerName: lecturer.name,
+          lecturerStaffId: lecturer.staffId,
+          reportId: report.id,
+        });
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          totalLecturers: reports.length,
+          reports
+        }
+      });
+    } catch (error) {
+      console.error('Error generating all lecturer reports:', error);
+      return res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+
+  // ============================================================
+  // EXISTING REPORT METHODS
+  // ============================================================
   async generateWorkloadSummary(_req: Request, res: Response) {
     try {
       const lecturers = await prisma.lecturer.findMany({
@@ -392,7 +553,7 @@ export class ReportController {
       const levelNum = parseInt(level);
 
       const courses = await prisma.course.findMany({
-        where: { 
+        where: {
           level: levelNum,
           status: true
         },
@@ -470,6 +631,9 @@ export class ReportController {
     }
   }
 
+  // ============================================================
+  // EXPORT TO PDF
+  // ============================================================
   async exportToPDF(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
@@ -498,8 +662,12 @@ export class ReportController {
           pdfDoc = this.generateLevelPDF(reportData);
           filename = `level-based-list-${report.id}.pdf`;
           break;
+        case 'LECTURER_ALLOCATION_REPORT':
+          pdfDoc = this.generateLecturerAllocationPDF(reportData);
+          filename = `lecturer-${reportData.lecturer?.staffId || 'report'}-${report.id}.pdf`;
+          break;
         default:
-          throw new Error('Unknown report type');
+          throw new Error(`Unknown report type: ${report.reportType}`);
       }
 
       const pdfBuffer = await new Promise<Buffer>((resolve) => {
@@ -515,7 +683,7 @@ export class ReportController {
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.setHeader('Content-Length', pdfBuffer.length);
-      
+
       return res.send(pdfBuffer);
     } catch (error) {
       console.error('PDF Export Error:', error);
@@ -523,6 +691,9 @@ export class ReportController {
     }
   }
 
+  // ============================================================
+  // PDF GENERATORS
+  // ============================================================
   private generateAllocationPDF(data: any) {
     const tableData = data.allocations.map((a: any, index: number) => [
       String(index + 1),
@@ -565,6 +736,153 @@ export class ReportController {
           ['auto', 'auto', 'auto', '*', 'auto', 'auto', 'auto']
         ),
         { text: '', margin: [0, 20, 0, 0] },
+      ],
+      footer: (currentPage: number, pageCount: number) => createFooter(currentPage, pageCount),
+    };
+  }
+
+  private generateLecturerAllocationPDF(data: any) {
+    const tableData = data.allocations.map((a: any, index: number) => [
+      String(index + 1),
+      a.courseCode,
+      a.courseTitle,
+      String(a.units),
+      String(a.level),
+      formatEnum(a.nature),
+      formatStatus(a.status)
+    ]);
+
+    const utilizationColor = data.summary.utilization > 80 ? '#DC2626' :
+      data.summary.utilization > 60 ? '#F59E0B' : '#16A34A';
+
+    return {
+      pageSize: 'A4',
+      pageMargins: [35, 55, 35, 55],
+      defaultStyle: {
+        font: DEFAULT_FONT, // Changed from 'PlusJakartaSans' to DEFAULT_FONT
+      },
+      content: [
+        createHeader(),
+        {
+          text: `Allocation Report`,
+          fontSize: 24,
+          bold: true,
+          color: '#1E293B',
+          alignment: 'center',
+          margin: [0, 10, 0, 4],
+          font: DEFAULT_FONT,
+        },
+        {
+          text: `${data.lecturer.name}`,
+          fontSize: 16,
+          color: '#2563EB',
+          alignment: 'center',
+          margin: [0, 0, 0, 16],
+          font: DEFAULT_FONT,
+        },
+        // Lecturer Info Card
+        {
+          table: {
+            widths: ['*', '*'],
+            body: [
+              [
+                {
+                  text: 'Lecturer Details',
+                  colSpan: 2,
+                  bold: true,
+                  fontSize: 12,
+                  color: '#2563EB',
+                  margin: [0, 0, 0, 6],
+                  font: DEFAULT_FONT,
+                },
+                {}
+              ],
+              [
+                { text: 'Staff ID', bold: true, color: '#64748B', fontSize: 10, font: DEFAULT_FONT },
+                { text: data.lecturer.staffId || '-', color: '#1E293B', fontSize: 10, font: DEFAULT_FONT },
+              ],
+              [
+                { text: 'Rank', bold: true, color: '#64748B', fontSize: 10, font: DEFAULT_FONT },
+                { text: formatEnum(data.lecturer.rank), color: '#1E293B', fontSize: 10, font: DEFAULT_FONT },
+              ],
+              [
+                { text: 'Email', bold: true, color: '#64748B', fontSize: 10, font: DEFAULT_FONT },
+                { text: data.lecturer.email || '-', color: '#1E293B', fontSize: 10, font: DEFAULT_FONT },
+              ],
+              [
+                { text: 'Specialization', bold: true, color: '#64748B', fontSize: 10, font: DEFAULT_FONT },
+                { text: data.lecturer.specialization || '-', color: '#1E293B', fontSize: 10, font: DEFAULT_FONT },
+              ],
+            ],
+          },
+          layout: 'lightHorizontalLines',
+          margin: [0, 0, 0, 16],
+        },
+        // Workload Summary Cards
+        {
+          columns: [
+            {
+              stack: [
+                { text: `${data.summary.totalCourses}`, fontSize: 20, bold: true, color: '#2563EB', alignment: 'center', font: DEFAULT_FONT },
+                { text: 'Courses Assigned', fontSize: 9, color: '#64748B', alignment: 'center', font: DEFAULT_FONT },
+              ],
+              fillColor: '#EFF6FF',
+              padding: [12, 8, 12, 8],
+              alignment: 'center',
+            },
+            {
+              stack: [
+                { text: `${data.summary.totalLoad} hrs`, fontSize: 20, bold: true, color: '#16A34A', alignment: 'center', font: DEFAULT_FONT },
+                { text: 'Total Workload', fontSize: 9, color: '#64748B', alignment: 'center', font: DEFAULT_FONT },
+              ],
+              fillColor: '#F0FDF4',
+              padding: [12, 8, 12, 8],
+              alignment: 'center',
+            },
+            {
+              stack: [
+                { text: `${data.summary.maxLoad} hrs`, fontSize: 20, bold: true, color: '#F59E0B', alignment: 'center', font: DEFAULT_FONT },
+                { text: 'Max Capacity', fontSize: 9, color: '#64748B', alignment: 'center', font: DEFAULT_FONT },
+              ],
+              fillColor: '#FFFBEB',
+              padding: [12, 8, 12, 8],
+              alignment: 'center',
+            },
+            {
+              stack: [
+                { text: `${data.summary.utilization}%`, fontSize: 20, bold: true, color: utilizationColor, alignment: 'center', font: DEFAULT_FONT },
+                { text: 'Utilization', fontSize: 9, color: '#64748B', alignment: 'center', font: DEFAULT_FONT },
+              ],
+              fillColor: data.summary.utilization > 80 ? '#FEF2F2' : '#F0FDF4',
+              padding: [12, 8, 12, 8],
+              alignment: 'center',
+            },
+          ],
+          columnGap: 8,
+          margin: [0, 0, 0, 16],
+        },
+        // Allocation Table
+        {
+          text: 'Assigned Courses',
+          fontSize: 14,
+          bold: true,
+          color: '#1E293B',
+          margin: [0, 0, 0, 8],
+          font: DEFAULT_FONT,
+        },
+        createTable(
+          ['#', 'Course Code', 'Course Title', 'Units', 'Level', 'Nature', 'Status'],
+          tableData,
+          ['auto', 'auto', '*', 'auto', 'auto', 'auto', 'auto']
+        ),
+        {
+          text: 'This report shows your current course allocation for the academic session. Please review and confirm your assigned courses.',
+          fontSize: 9,
+          color: '#64748B',
+          alignment: 'center',
+          margin: [0, 16, 0, 0],
+          font: DEFAULT_FONT,
+        },
       ],
       footer: (currentPage: number, pageCount: number) => createFooter(currentPage, pageCount),
     };
