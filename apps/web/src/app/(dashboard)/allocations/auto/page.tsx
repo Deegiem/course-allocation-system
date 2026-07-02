@@ -1,32 +1,48 @@
+// src/app/allocations/auto/page.tsx
 'use client';
 
 import React, { useState } from 'react';
 import Layout from '@/components/common/Layout/Layout';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api/client';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { AutoAllocationHeader } from '@/components/allocations/AutoAllocationHeader';
+import { AllocationCriteriaGrid } from '@/components/allocations/AllocationCriteriaGrid';
+import { AllocationAlert } from '@/components/allocations/AllocationAlert';
+import { AllocationActionCard } from '@/components/allocations/AllocationActionCard';
+import { AllocationConfirmationDialog } from '@/components/allocations/AllocationConfirmationDialog';
+
+interface AllocationResult {
+  id: number;
+  lecturerId: number;
+  courseId: number;
+  status: string;
+  score: number;
+}
 
 export default function AutoAllocationPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<AllocationResult[] | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const handleAutoAllocate = async () => {
+    setShowConfirmDialog(false);
     setLoading(true);
     setError(null);
     setResult(null);
 
     try {
-      const response = await fetch('/api/allocations/auto', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assignedBy: 'Admin' }),
+      const result = await api.post<AllocationResult[]>('/allocations/auto', {
+        assignedBy: 'Admin',
       });
-      const data = await response.json();
-      if (data.success) {
-        setResult(data.data);
+
+      if (result.success) {
+        setResult(result.data || []);
         setTimeout(() => router.push('/allocations'), 2000);
       } else {
-        setError(data.error || 'Auto allocation failed');
+        setError(result.error || 'Auto allocation failed');
       }
     } catch (err) {
       setError('Network error');
@@ -37,41 +53,47 @@ export default function AutoAllocationPage() {
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Auto Allocation</h1>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
-          The system will automatically allocate all unallocated courses to the best lecturers based on:
-        </p>
-        <ul className="list-disc list-inside text-gray-600 dark:text-gray-400 mb-6 space-y-1">
-          <li>Specialization match</li>
-          <li>Experience level</li>
-          <li>Workload balance</li>
-          <li>Teaching style compatibility</li>
-        </ul>
+      <div className="space-y-6">
+        {/* Header */}
+        <AutoAllocationHeader />
 
+        {/* Criteria Grid */}
+        <AllocationCriteriaGrid />
+
+        {/* Error Alert */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg mb-6">
-            {error}
-          </div>
+          <AllocationAlert
+            type="error"
+            title="Error"
+            message={error}
+            icon={AlertCircle}
+          />
         )}
 
+        {/* Success Alert */}
         {result && (
-          <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-4 rounded-lg mb-6">
-            <p className="font-semibold">✅ Auto allocation completed!</p>
-            <p className="text-sm mt-1">Created {result.length} allocations. Redirecting...</p>
-          </div>
+          <AllocationAlert
+            type="success"
+            title="Allocation Completed"
+            message={`Successfully created ${result.length} allocation(s). You will be redirected shortly.`}
+            icon={CheckCircle2}
+          />
         )}
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-          <button
-            onClick={handleAutoAllocate}
-            disabled={loading}
-            className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 text-lg font-semibold"
-          >
-            {loading ? 'Running allocation...' : '🚀 Run Auto Allocation'}
-          </button>
-        </div>
+        {/* Action Card */}
+        <AllocationActionCard
+          loading={loading}
+          onRunAllocation={() => setShowConfirmDialog(true)}
+        />
       </div>
+
+      {/* Confirmation Dialog */}
+      <AllocationConfirmationDialog
+        isOpen={showConfirmDialog}
+        onConfirm={handleAutoAllocate}
+        onCancel={() => setShowConfirmDialog(false)}
+        loading={loading}
+      />
     </Layout>
   );
 }

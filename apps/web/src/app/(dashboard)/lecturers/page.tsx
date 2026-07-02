@@ -5,6 +5,7 @@ import Layout from '@/components/common/Layout/Layout';
 import Link from 'next/link';
 import { Plus, Users } from 'lucide-react';
 import LecturerList from '@/components/lecturers/LecturerList';
+import { LecturerReportNotice } from '@/components/lecturers/LecturerReportNotice';
 
 export default function LecturersPage() {
   return (
@@ -27,6 +28,7 @@ export default function LecturersPage() {
             Add Lecturer
           </Link>
         </div>
+        <LecturerReportNotice />
 
         <div className="dashboard-card overflow-hidden">
           <LecturerList />

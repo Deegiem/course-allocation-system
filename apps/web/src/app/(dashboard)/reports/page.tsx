@@ -1,3 +1,4 @@
+// src/app/reports/page.tsx
 'use client';
 
 import {
@@ -8,9 +9,13 @@ import {
   Download,
   Loader2,
   ClipboardList,
+  Users,
+  FileCheck,
+  Info,
 } from "lucide-react";
 import React, { useState } from 'react';
 import Layout from '@/components/common/Layout/Layout';
+import { api } from '@/lib/api/client';
 
 interface ReportType {
   value: string;
@@ -46,13 +51,32 @@ const REPORT_TYPES: ReportType[] = [
 
 const LEVEL_OPTIONS = [100, 200, 300, 400, 500];
 
+interface LecturerReport {
+  lecturerId: number;
+  lecturerName: string;
+  lecturerStaffId: string;
+  reportId: number;
+}
+
+interface LecturerReportsResponse {
+  reports: LecturerReport[];
+}
+
 export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
+  const [loadingLecturer, setLoadingLecturer] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [reportType, setReportType] = useState('allocation');
   const [level, setLevel] = useState('400');
   const [lastReportId, setLastReportId] = useState<number | null>(null);
+  
+  // Lecturer report states
+  const [lecturerReports, setLecturerReports] = useState<LecturerReport[]>([]);
+  const [lecturerError, setLecturerError] = useState<string | null>(null);
+
+  // ✅ Find the selected report
+  const selectedReport = REPORT_TYPES.find(r => r.value === reportType);
 
   const generateReport = async () => {
     setLoading(true);
@@ -101,7 +125,23 @@ export default function ReportsPage() {
     }
   };
 
-  const selectedReport = REPORT_TYPES.find(r => r.value === reportType);
+  const generateAllLecturerReports = async () => {
+    setLoadingLecturer(true);
+    setLecturerError(null);
+    try {
+      const result = await api.post<LecturerReportsResponse>('/reports/lecturers/generate-all', {});
+      
+      if (result.success && result.data) {
+        setLecturerReports(result.data.reports || []);
+      } else {
+        setLecturerError(result.error || 'Failed to generate lecturer reports');
+      }
+    } catch (err) {
+      setLecturerError('Network error');
+    } finally {
+      setLoadingLecturer(false);
+    }
+  };
 
   return (
     <Layout>
@@ -121,7 +161,7 @@ export default function ReportsPage() {
                 Reports
               </h1>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Generate and export allocation reports, workload summaries and academic records.
+                Generate and export allocation reports, workload summaries, and lecturer-specific reports.
               </p>
             </div>
           </div>
@@ -140,8 +180,13 @@ export default function ReportsPage() {
           </div>
         )}
 
-        {/* Report Generation Form */}
+        {/* ===== SECTION 1: Standard Reports ===== */}
         <div className="bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm p-6 space-y-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <BarChart3 className="inline-block h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
+            Standard Reports
+          </h2>
+
           <div>
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Report Type *
@@ -158,6 +203,21 @@ export default function ReportsPage() {
               ))}
             </select>
           </div>
+
+          {/* ✅ Display selected report description */}
+          {selectedReport && (
+            <div className="flex items-start gap-2 rounded-md bg-blue-50 dark:bg-blue-900/20 p-3 border border-blue-200 dark:border-blue-800">
+              <span className={`${selectedReport.color} mt-0.5`}>{selectedReport.icon}</span>
+              <div>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {selectedReport.label}
+                </span>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {selectedReport.description}
+                </p>
+              </div>
+            </div>
+          )}
 
           {reportType === 'level' && (
             <div>
@@ -214,11 +274,109 @@ export default function ReportsPage() {
           )}
         </div>
 
+        {/* ===== SECTION 2: Lecturer Reports ===== */}
+        <div className="bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <Users className="inline-block h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
+              Lecturer Allocation Reports
+            </h2>
+            <button
+              onClick={generateAllLecturerReports}
+              disabled={loadingLecturer}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
+            >
+              {loadingLecturer ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <FileCheck className="h-4 w-4" />
+                  Generate All
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Generate clean, lecturer-friendly allocation reports without scores or administrative details.
+                Reports can also be generated individually from each lecturer's detail page.
+              </p>
+            </div>
+          </div>
+
+          {lecturerError && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 p-4 rounded-md">
+              {lecturerError}
+            </div>
+          )}
+
+          {lecturerReports.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      Lecturer
+                    </th>
+                    <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      Staff ID
+                    </th>
+                    <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      Report ID
+                    </th>
+                    <th className="py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lecturerReports.map((report) => (
+                    <tr key={report.lecturerId} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="py-3 text-sm font-medium text-gray-900 dark:text-white">
+                        {report.lecturerName}
+                      </td>
+                      <td className="py-3 text-sm text-gray-500 dark:text-gray-400">
+                        {report.lecturerStaffId || '-'}
+                      </td>
+                      <td className="py-3 text-sm text-gray-500 dark:text-gray-400">
+                        #{report.reportId}
+                      </td>
+                      <td className="py-3 text-right">
+                        <a
+                          href={`/api/reports/${report.reportId}/export`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          Download PDF
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {lecturerReports.length === 0 && !loadingLecturer && !lecturerError && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 py-2">
+              No lecturer reports generated yet. Click "Generate All" to create reports for all lecturers.
+            </p>
+          )}
+        </div>
+
         {/* Report Types Info */}
         <div className="bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                <ClipboardList className="inline-block h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
-                 Report Types
+            <ClipboardList className="inline-block h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
+            Report Types
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {REPORT_TYPES.map((type) => (

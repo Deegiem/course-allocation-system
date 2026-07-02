@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Layout from '@/components/common/Layout/Layout';
 import { useRouter } from 'next/navigation';
 import { formatEnum } from '@/lib/format';
+import { api } from '@/lib/api/client'; // ← ADD THIS IMPORT
 
 const RANK_OPTIONS = [
   'PROFESSOR',
@@ -33,7 +34,7 @@ export default function CreateLecturerPage() {
     staffId: '',
     name: '',
     email: '',
-    rank: 'Lecturer I',
+    rank: 'LECTURER_I', // ← Changed to match enum value
     specialization: '',
     teachingStyle: 'MIXED_METHOD',
     yearsOfExperience: 0,
@@ -46,17 +47,14 @@ export default function CreateLecturerPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/lecturers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          specialization: formData.specialization.split(',').map(s => s.trim()),
-          yearsOfExperience: Number(formData.yearsOfExperience),
-          maxHours: Number(formData.maxHours),
-        }),
+      // ✅ USE API CLIENT INSTEAD OF FETCH
+      const result = await api.post('/lecturers', {
+        ...formData,
+        specialization: formData.specialization.split(',').map(s => s.trim()),
+        yearsOfExperience: Number(formData.yearsOfExperience),
+        maxHours: Number(formData.maxHours),
       });
-      const result = await response.json();
+
       if (result.success) {
         router.push('/lecturers');
       } else {
@@ -88,7 +86,7 @@ export default function CreateLecturerPage() {
               required
               value={formData.staffId}
               onChange={(e) => setFormData({ ...formData, staffId: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md  dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
             />
           </div>
 
@@ -99,7 +97,7 @@ export default function CreateLecturerPage() {
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md  dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
             />
           </div>
 
@@ -110,7 +108,7 @@ export default function CreateLecturerPage() {
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md  dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
             />
           </div>
 
@@ -120,7 +118,7 @@ export default function CreateLecturerPage() {
               required
               value={formData.rank}
               onChange={(e) => setFormData({ ...formData, rank: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md  dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
             >
               {RANK_OPTIONS.map((rank) => (
                 <option key={rank} value={rank}>{formatEnum(rank)}</option>
@@ -136,7 +134,7 @@ export default function CreateLecturerPage() {
               value={formData.specialization}
               onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
               placeholder="Computer Science, Data Science, AI"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md  dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
             />
           </div>
 
@@ -146,7 +144,7 @@ export default function CreateLecturerPage() {
               required
               value={formData.teachingStyle}
               onChange={(e) => setFormData({ ...formData, teachingStyle: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md  dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
             >
               {TEACHING_STYLE_OPTIONS.map((style) => (
                 <option key={style} value={style}>{formatEnum(style)}</option>
@@ -162,7 +160,7 @@ export default function CreateLecturerPage() {
               min="0"
               value={formData.yearsOfExperience}
               onChange={(e) => setFormData({ ...formData, yearsOfExperience: Number(e.target.value) })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md  dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
             />
           </div>
 
@@ -174,7 +172,7 @@ export default function CreateLecturerPage() {
               max="30"
               value={formData.maxHours}
               onChange={(e) => setFormData({ ...formData, maxHours: Number(e.target.value) })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md  dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
             />
           </div>
 

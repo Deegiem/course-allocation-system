@@ -239,7 +239,7 @@ export default function AllocationList({
         </table>
       </div>
 
-      <div className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+      <div className="text-sm text-gray-500 dark:text-gray-400 mt-4 p-6">
         Total: {allocations.length} allocations
       </div>
 

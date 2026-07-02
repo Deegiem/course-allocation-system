@@ -1,9 +1,12 @@
+// src/app/lecturers/[id]/page.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import Layout from '@/components/common/Layout/Layout';
 import Link from 'next/link';
 import { formatEnum } from '@/lib/format';
+import { api } from '@/lib/api/client';
+import { LecturerActions } from '@/components/lecturers/LecturerActions';
 
 interface Lecturer {
   id: number;
@@ -18,16 +21,26 @@ interface Lecturer {
   isActive: boolean;
 }
 
+interface Course {
+  id: number;
+  code: string;
+  title: string;
+  units: number;
+}
+
 interface Allocation {
   id: number;
   courseId: number;
-  course?: {
-    code: string;
-    title: string;
-    units: number;
-  };
+  course?: Course;
   status: string;
   score: number | null;
+  lecturerId: number;
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
 }
 
 export default function LecturerDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -46,41 +59,38 @@ export default function LecturerDetailPage({ params }: { params: Promise<{ id: s
       try {
         console.log(`Fetching data for lecturer ID: ${id}`);
 
-        // ✅ Fetch lecturer data
-        const lecturerRes = await fetch(`/api/lecturers/${id}`);
-        const lecturerData = await lecturerRes.json();
-        console.log('Lecturer data:', lecturerData);
+        // ✅ Fetch lecturer data using API client
+        const lecturerResult = await api.get<Lecturer>(`/lecturers/${id}`);
+        console.log('Lecturer data:', lecturerResult);
 
         // ✅ Fetch allocations for this specific lecturer ONLY
-        const allocRes = await fetch(`/api/allocations?lecturerId=${id}`);
-        const allocData = await allocRes.json();
-        console.log('Allocations data:', allocData);
+        const allocResult = await api.get<Allocation[]>(`/allocations?lecturerId=${id}`);
+        console.log('Allocations data:', allocResult);
 
         if (isMounted) {
-          if (lecturerData.success) {
-            setLecturer(lecturerData.data);
+          if (lecturerResult.success && lecturerResult.data) {
+            setLecturer(lecturerResult.data);
           } else {
             setError('Lecturer not found');
           }
 
-          if (allocData.success) {
+          if (allocResult.success && allocResult.data) {
             // ✅ Filter allocations to only show this lecturer's allocations
-            const lecturerAllocations = (allocData.data || []).filter(
-              (a: any) => a.lecturerId === parseInt(id)
+            const lecturerAllocations = allocResult.data.filter(
+              (a: Allocation) => a.lecturerId === parseInt(id)
             );
 
             console.log(`Filtered allocations for lecturer ${id}:`, lecturerAllocations);
 
-            // Fetch course details for each allocation
+            // Fetch course details for each allocation using API client
             const allocsWithCourses = await Promise.all(
-              lecturerAllocations.map(async (alloc: any) => {
+              lecturerAllocations.map(async (alloc: Allocation) => {
                 if (alloc.courseId) {
                   try {
-                    const courseRes = await fetch(`/api/courses/${alloc.courseId}`);
-                    const courseData = await courseRes.json();
+                    const courseResult = await api.get<Course>(`/courses/${alloc.courseId}`);
                     return {
                       ...alloc,
-                      course: courseData.success ? courseData.data : null
+                      course: courseResult.success ? courseResult.data : undefined
                     };
                   } catch {
                     return alloc;
@@ -92,12 +102,12 @@ export default function LecturerDetailPage({ params }: { params: Promise<{ id: s
 
             // Show only active allocations (not rejected)
             const activeAllocs = allocsWithCourses.filter(
-              (a: any) => a.status !== 'REJECTED'
+              (a: Allocation) => a.status !== 'REJECTED'
             );
             setAllocations(activeAllocs);
 
             // ✅ Calculate workload from active allocations
-            const totalWorkload = activeAllocs.reduce((sum, a) => {
+            const totalWorkload = activeAllocs.reduce((sum: number, a: Allocation) => {
               return sum + (a.course?.units || 0);
             }, 0);
             setWorkload(totalWorkload);
@@ -172,6 +182,7 @@ export default function LecturerDetailPage({ params }: { params: Promise<{ id: s
             <p className="text-gray-600 dark:text-gray-400 mt-1">{lecturer.staffId} - {lecturer.rank}</p>
           </div>
           <div className="flex gap-3">
+            <LecturerActions lecturerId={lecturer.id} lecturerName={lecturer.name} />
             <Link
               href="/lecturers"
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -214,8 +225,8 @@ export default function LecturerDetailPage({ params }: { params: Promise<{ id: s
                 <dt className="text-gray-600 dark:text-gray-400">Status</dt>
                 <dd>
                   <span className={`px-2 py-1 text-xs rounded-full ${lecturer.isActive
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                     }`}>
                     {lecturer.isActive ? 'Active' : 'Inactive'}
                   </span>
@@ -244,8 +255,8 @@ export default function LecturerDetailPage({ params }: { params: Promise<{ id: s
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                 <div
                   className={`h-2.5 rounded-full ${utilization > 90 ? 'bg-red-600' :
-                      utilization > 70 ? 'bg-yellow-500' :
-                        'bg-green-600'
+                    utilization > 70 ? 'bg-yellow-500' :
+                      'bg-green-600'
                     }`}
                   style={{ width: `${Math.min(utilization, 100)}%` }}
                 />
