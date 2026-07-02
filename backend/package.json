@@ -7,10 +7,12 @@
     "dev": "nodemon src/app.ts",
     "build": "tsc",
     "start": "node dist/app.js",
+    "deploy": "prisma db push && npm run start",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
-    "test:report": "jest --json --outputFile=test-results.json && ts-node tests/report-runner.ts",    "prisma:generate": "prisma generate",
+    "test:report": "jest --json --outputFile=test-results.json && ts-node tests/report-runner.ts",
+    "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts"
