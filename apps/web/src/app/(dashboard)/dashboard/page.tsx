@@ -153,7 +153,7 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <Link href="/allocations/manual" className="dashboard-primary-btn w-fit">
+          <Link href="/allocations" className="dashboard-primary-btn w-fit">
             <Plus className="h-4 w-4" />
             New Allocation
           </Link>
