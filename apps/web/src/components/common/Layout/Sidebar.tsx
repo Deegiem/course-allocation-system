@@ -57,7 +57,7 @@ export default function Sidebar({
       <aside
         className={`
           fixed left-0 top-0 z-50 h-screen border-r border-white/10 bg-[#182133] transition-all duration-300
-          ${isOpen ? 'w-64' : 'w-24'}
+          ${isOpen ? 'w-64' : 'w-29'}
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
         `}
@@ -81,26 +81,31 @@ export default function Sidebar({
             )}
 
             {/* Mobile close — mobile only */}
-            <button
-              onClick={closeMobileSidebar}
-              className="dashboard-icon-btn ml-auto shrink-0 lg:hidden"
-              aria-label="Close sidebar"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="lg:hidden">
+              <button
+                onClick={closeMobileSidebar}
+                className="dashboard-icon-btn ml-auto shrink-0 lg:hidden"
+                aria-label="Close sidebar"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
 
             {/* Collapse/expand — desktop only */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={`dashboard-icon-btn hidden shrink-0 lg:flex ${isOpen ? '' : 'ml-auto'}`}
-              aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-            >
-              {isOpen ? (
-                <ChevronLeft className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </button>
+            <div className="sm:hidden lg:flex">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={`dashboard-icon-btn sm:hidden shrink-0 lg:flex ${isOpen ? '' : 'ml-auto'}`}
+                aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+              >
+                {isOpen ? (
+                  <ChevronLeft className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Nav */}
@@ -116,9 +121,8 @@ export default function Sidebar({
                     key={item.href}
                     href={item.href}
                     onClick={closeMobileSidebar}
-                    className={`sidebar-link ${isActive ? 'sidebar-link-active' : ''} ${
-                      !isOpen ? 'justify-center px-3' : ''
-                    }`}
+                    className={`sidebar-link ${isActive ? 'sidebar-link-active' : ''} ${!isOpen ? 'justify-center px-3' : ''
+                      }`}
                     title={!isOpen ? item.label : undefined}
                   >
                     <Icon className="h-5 w-5 shrink-0" strokeWidth={2.1} />

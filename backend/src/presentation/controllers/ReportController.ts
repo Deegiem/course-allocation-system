@@ -113,12 +113,12 @@ function createEnhancedHeader(): any {
         [
           {
             stack: [
-              { text: 'EDUALLOC', fontSize: 28, bold: true, color: COLORS.white, font: DEFAULT_FONT },
+              { text: 'EDUALLOC', fontSize: 26, bold: true, color: COLORS.white, font: DEFAULT_FONT },
               { text: 'Course Allocation Management System', fontSize: 11, color: COLORS.white, font: DEFAULT_FONT },
             ],
             fillColor: COLORS.primary,
             margin: [25, 20, 25, 16],
-            alignment: 'center',
+            alignment: 'left',
           },
         ],
       ],
@@ -169,15 +169,15 @@ function createEnhancedInfoCard(data: {
           {},
         ],
         ...rows.map(row => [
-          { 
-            text: row[0], 
-            bold: true, 
-            color: COLORS.secondary, 
-            fontSize: 10, 
+          {
+            text: row[0],
+            bold: true,
+            color: COLORS.secondary,
+            fontSize: 10,
             font: DEFAULT_FONT,
             margin: [0, 4, 0, 4],
           },
-          typeof row[1] === 'string' 
+          typeof row[1] === 'string'
             ? { text: row[1], color: COLORS.grayDark, fontSize: 10, font: DEFAULT_FONT, margin: [0, 4, 0, 4] }
             : { ...row[1], margin: [0, 4, 0, 4] }
         ]),
@@ -213,23 +213,23 @@ function createEnhancedStatsCards(stats: { label: string; value: string; color?:
 }
 
 function createEnhancedTable(
-  columns: string[], 
-  rows: any[][], 
+  columns: string[],
+  rows: any[][],
   columnWidths: string[],
-  options?: { 
-    headerColor?: string; 
+  options?: {
+    headerColor?: string;
     alternateRowColor?: string;
     rowColors?: (rowIndex: number, data: any) => string;
   }
 ): any {
   const headerColor = options?.headerColor || COLORS.primary;
-  
+
   const headerRow = columns.map(text => ({
     text: text.toUpperCase(),
     bold: true,
     color: COLORS.white,
     fillColor: headerColor,
-    padding: [10, 8, 10, 8],
+    padding: [12, 10, 12, 10],
     fontSize: 9,
     font: DEFAULT_FONT,
     alignment: 'center',
@@ -246,7 +246,7 @@ function createEnhancedTable(
           return row.map((cell, cellIndex) => ({
             text: typeof cell === 'object' ? cell.text : cell,
             fontSize: 9,
-            padding: [8, 6, 8, 6],
+            padding: [18, 15, 18, 15],
             color: typeof cell === 'object' ? (cell.color || COLORS.grayDark) : COLORS.grayDark,
             fillColor: options?.rowColors ? options.rowColors(rowIndex, cell) : fillColor,
             font: DEFAULT_FONT,
@@ -276,7 +276,7 @@ function createEnhancedFooter(currentPage: number, pageCount: number, ref?: stri
     columns: [
       {
         stack: [
-          { text: 'EduAlloc • Course Allocation Management System', fontSize: 8, color: COLORS.secondary, font: DEFAULT_FONT },
+          { text: 'EduAlloc • Course Allocation Management System', fontSize: 10, color: COLORS.secondary, font: DEFAULT_FONT },
           { text: 'Generated for Academic Administration. Confidential PDF Report.', fontSize: 7, color: COLORS.gray, font: DEFAULT_FONT },
         ],
         alignment: 'left',
@@ -310,9 +310,9 @@ interface PDFOptions {
 
 function createStandardPDF(options: PDFOptions): any {
   const content: any[] = [];
-  
+
   content.push(options.header || createEnhancedHeader());
-  
+
   content.push({
     text: options.title,
     fontSize: 24,
@@ -322,7 +322,7 @@ function createStandardPDF(options: PDFOptions): any {
     margin: [0, 16, 0, 4],
     font: DEFAULT_FONT,
   });
-  
+
   if (options.subtitle) {
     content.push({
       text: options.subtitle,
@@ -333,15 +333,15 @@ function createStandardPDF(options: PDFOptions): any {
       font: DEFAULT_FONT,
     });
   }
-  
+
   content.push(options.infoCard);
   content.push(options.statsCards);
   content.push(options.table);
-  
+
   if (options.extraContent) {
     content.push(...options.extraContent);
   }
-  
+
   return {
     pageSize: 'A4',
     pageMargins: [35, 55, 35, 55],
@@ -349,7 +349,7 @@ function createStandardPDF(options: PDFOptions): any {
       font: DEFAULT_FONT,
     },
     content,
-    footer: (currentPage: number, pageCount: number) => 
+    footer: (currentPage: number, pageCount: number) =>
       createEnhancedFooter(currentPage, pageCount, options.footerRef),
   };
 }
@@ -770,7 +770,7 @@ export class ReportController {
     const tableData = data.allocations.map((a: any, index: number) => {
       const statusText = formatStatus(a.status);
       const statusColor = getStatusColor(a.status);
-      
+
       return [
         String(index + 1).padStart(3, '0'),
         a.lecturer,
@@ -815,7 +815,7 @@ export class ReportController {
     const tableData = data.allocations.map((a: any, index: number) => {
       const statusText = formatStatus(a.status);
       const statusColor = getStatusColor(a.status);
-      
+
       return [
         String(index + 1).padStart(2, '0'),
         a.courseCode,
@@ -829,13 +829,13 @@ export class ReportController {
 
     const utilizationColor = data.summary.utilization > 80 ? COLORS.danger :
       data.summary.utilization > 60 ? COLORS.warning : COLORS.success;
-    
+
     const utilizationBgColor = data.summary.utilization > 80 ? COLORS.dangerLight :
       data.summary.utilization > 60 ? COLORS.warningLight : COLORS.successLight;
 
     return {
       pageSize: 'A4',
-      pageMargins: [35, 55, 35, 55],
+      pageMargins: [20, 40, 20, 40],
       defaultStyle: {
         font: DEFAULT_FONT,
       },
@@ -860,7 +860,7 @@ export class ReportController {
         },
         {
           table: {
-            widths: ['40%', '60%'],
+            widths: ['auto', '*'],
             body: [
               [
                 {
@@ -869,7 +869,7 @@ export class ReportController {
                   bold: true,
                   fontSize: 12,
                   color: COLORS.primary,
-                  margin: [0, 0, 0, 8],
+                  margin: [0, 8, 0, 8],
                   font: DEFAULT_FONT,
                 },
                 {}
@@ -893,12 +893,12 @@ export class ReportController {
             ],
           },
           layout: {
-            hLineWidth: () => 0.5,
+            hLineWidth: () => 1,
             hLineColor: () => COLORS.border,
             paddingLeft: () => 8,
             paddingRight: () => 8,
-            paddingTop: () => 4,
-            paddingBottom: () => 4,
+            paddingTop: () => 6,
+            paddingBottom: () => 6,
           },
           margin: [0, 0, 0, 20],
         },
@@ -953,9 +953,9 @@ export class ReportController {
           font: DEFAULT_FONT,
         },
         createEnhancedTable(
-          ['#', 'Course Code', 'Course Title', 'Units', 'Level', 'Nature', 'Status'],
+          ['#', 'Course Code', 'Course Title', 'Units', 'Level', 'Nature'],
           tableData,
-          ['auto', 'auto', '*', 'auto', 'auto', 'auto', 'auto'],
+          ['auto', 'auto', '*', 'auto', 'auto', 'auto'],
           {
             rowColors: (rowIndex, data) => {
               if (typeof data === 'object' && data.text) {
@@ -973,7 +973,7 @@ export class ReportController {
             {
               stack: [
                 { text: '_________________________', fontSize: 10, color: COLORS.grayDark, font: DEFAULT_FONT },
-                { text: 'Lecturer Signature', fontSize: 9, color: COLORS.secondary, font: DEFAULT_FONT },
+                { text: 'HOD Approval', fontSize: 9, color: COLORS.secondary, font: DEFAULT_FONT },
               ],
               alignment: 'center',
               margin: [0, 20, 0, 0],
@@ -981,7 +981,7 @@ export class ReportController {
             {
               stack: [
                 { text: '_________________________', fontSize: 10, color: COLORS.grayDark, font: DEFAULT_FONT },
-                { text: 'HOD Approval', fontSize: 9, color: COLORS.secondary, font: DEFAULT_FONT },
+                { text: 'Lecturer Signature', fontSize: 9, color: COLORS.secondary, font: DEFAULT_FONT },
               ],
               alignment: 'center',
               margin: [0, 20, 0, 0],
@@ -999,7 +999,7 @@ export class ReportController {
           font: DEFAULT_FONT,
         },
       ],
-      footer: (currentPage: number, pageCount: number) => 
+      footer: (currentPage: number, pageCount: number) =>
         createEnhancedFooter(currentPage, pageCount, `Ref: ${data.lecturer.staffId || 'N/A'}`),
     };
   }
@@ -1009,7 +1009,7 @@ export class ReportController {
       let utilizationColor = COLORS.success;
       if (s.utilization > 80) utilizationColor = COLORS.danger;
       else if (s.utilization > 60) utilizationColor = COLORS.warning;
-      
+
       return [
         String(index + 1).padStart(2, '0'),
         s.name,
@@ -1064,7 +1064,7 @@ export class ReportController {
     const tableData = data.courses.map((c: any, index: number) => {
       const statusText = c.status;
       const statusColor = getStatusColor(c.status);
-      
+
       return [
         String(index + 1).padStart(2, '0'),
         c.code,
@@ -1076,8 +1076,8 @@ export class ReportController {
       ];
     });
 
-    const allocationRateColor = data.allocationRate > 80 ? COLORS.success : 
-                                data.allocationRate > 50 ? COLORS.warning : COLORS.danger;
+    const allocationRateColor = data.allocationRate > 80 ? COLORS.success :
+      data.allocationRate > 50 ? COLORS.warning : COLORS.danger;
 
     return createStandardPDF({
       title: `LEVEL ${data.level} - COURSE LIST`,

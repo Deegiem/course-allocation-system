@@ -26,7 +26,7 @@ export default function CourseList({ filter = 'all' }: CourseListProps) {
           if (result.success) {
             const courseData = result.data || [];
             setCourses(courseData);
-            
+
             // Fetch allocation status for each course
             const statusMap: Record<number, boolean> = {};
             for (const course of courseData) {
@@ -88,11 +88,11 @@ export default function CourseList({ filter = 'all' }: CourseListProps) {
   if (filteredCourses.length === 0) {
     return (
       <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-        {filter === 'unallocated' 
-          ? 'All courses are allocated! 🎉' 
+        {filter === 'unallocated'
+          ? 'All courses are allocated! 🎉'
           : filter === 'allocated'
-          ? 'No allocated courses found.'
-          : 'No courses found. Click "Add Course" to create one.'}
+            ? 'No allocated courses found.'
+            : 'No courses found. Click "Add Course" to create one.'}
       </div>
     );
   }
@@ -100,8 +100,8 @@ export default function CourseList({ filter = 'all' }: CourseListProps) {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-<thead className="bg-gray-50 dark:bg-gray-900">
-  <tr className="border-b border-gray-200 dark:border-gray-700">
+        <thead className="bg-gray-50 dark:bg-gray-900">
+          <tr className="border-b border-gray-200 dark:border-gray-700">
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Units</th>
@@ -115,81 +115,77 @@ export default function CourseList({ filter = 'all' }: CourseListProps) {
           {filteredCourses.map((course) => {
             const isAllocated = allocationStatus[course.id] || false;
             return (
-<tr
-  key={course.id}
-  className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
->
-<td className="px-6 py-4 whitespace-nowrap">
-  <span className="rounded-md bg-gray-100 px-2 py-1 font-mono text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-    {course.code}
-  </span>
-</td>
-<td className="px-6 py-4">
-  <div className="font-medium text-gray-900 dark:text-white">
-    {course.title}
-  </div>
-</td>
-<td className="px-6 py-4 whitespace-nowrap">
-  <span className="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
-    {course.units} Unit{course.units > 1 ? "s" : ""}
-  </span>
-</td>
-<td className="px-6 py-4 whitespace-nowrap">
-  <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-    {course.level} Level
-  </span>
-</td>
-<td className="px-6 py-4 whitespace-nowrap">
-  <span
-    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-      course.status
-        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-    }`}
-  >
-    <span
-      className={`mr-1.5 h-2 w-2 rounded-full ${
-        course.status ? "bg-green-500" : "bg-red-500"
-      }`}
-    />
-    {course.status ? "Active" : "Inactive"}
-  </span>
-</td>
-<td className="px-6 py-4 whitespace-nowrap">
-  <span
-    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-      isAllocated
-        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-        : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-    }`}
-  >
-    <span
-      className={`mr-1.5 h-2 w-2 rounded-full ${
-        isAllocated ? "bg-blue-500" : "bg-yellow-500"
-      }`}
-    />
-    {isAllocated ? "Allocated" : "Unallocated"}
-  </span>
-</td>
-<td className="px-6 py-4 whitespace-nowrap">
-  <div className="flex items-center gap-2">
-    <Link
-      href={`/courses/${course.id}`}
-      title="View course"
-      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-blue-600 transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-800 dark:text-blue-400 dark:hover:border-blue-700 dark:hover:bg-blue-900/20"
-    >
-      <Eye size={18} />
-    </Link>
+              <tr
+                key={course.id}
+                className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              >
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="rounded-md bg-gray-100 px-2 py-1 font-mono text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                    {course.code}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="font-medium text-gray-900 dark:text-white">
+                    {course.title}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+                    {course.units} Unit{course.units > 1 ? "s" : ""}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                    {course.level} Level
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${course.status
+                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                      }`}
+                  >
+                    <span
+                      className={`mr-1.5 h-2 w-2 rounded-full ${course.status ? "bg-green-500" : "bg-red-500"
+                        }`}
+                    />
+                    {course.status ? "Active" : "Inactive"}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${isAllocated
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                        : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                      }`}
+                  >
+                    <span
+                      className={`mr-1.5 h-2 w-2 rounded-full ${isAllocated ? "bg-blue-500" : "bg-yellow-500"
+                        }`}
+                    />
+                    {isAllocated ? "Allocated" : "Unallocated"}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/courses/${course.id}`}
+                      title="View course"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-blue-600 transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-800 dark:text-blue-400 dark:hover:border-blue-700 dark:hover:bg-blue-900/20"
+                    >
+                      <Eye size={18} />
+                    </Link>
 
-    <button
-      onClick={() => handleDelete(course.id)}
-      title="Delete course"
-      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-red-600 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-700 dark:border-gray-700 dark:bg-gray-800 dark:text-red-400 dark:hover:border-red-700 dark:hover:bg-red-900/20"
-    >
-      <Trash2 size={18} />
-    </button>
-  </div>
-</td>
+                    <button
+                      onClick={() => handleDelete(course.id)}
+                      title="Delete course"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-red-600 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-700 dark:border-gray-700 dark:bg-gray-800 dark:text-red-400 dark:hover:border-red-700 dark:hover:bg-red-900/20"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </td>
               </tr>
             );
           })}

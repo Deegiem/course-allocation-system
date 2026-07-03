@@ -13,7 +13,7 @@ export function LecturerReportNotice() {
           <p className="text-sm text-blue-700 dark:text-blue-300">
             <strong>HOD Note:</strong> You can generate individual allocation reports for each lecturer from their detail page.
             To generate reports for multiple lecturers, visit the{' '}
-            <Link href="/reports/lecturers" className="font-medium underline hover:no-underline">
+            <Link href="/reports" className="font-medium underline hover:no-underline">
               Lecturers Reports
             </Link>{' '}
             page.

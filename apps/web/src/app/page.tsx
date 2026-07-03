@@ -27,7 +27,7 @@ export default function Home() {
         <span className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-1.5 text-xs font-semibold text-[var(--primary-strong)]">
           Built for Higher Institutions
         </span>
-        <h1 className="mt-6 panel-section-title text-4xl sm:text-5xl">
+        <h1 className="mt-6 panel-section-title text-4xl sm:text-5xl lg:text-9xl">
           Course allocation, <span className="text-[var(--primary)]">without the spreadsheet chaos</span>
         </h1>
         <p className="mt-5 text-lg text-[var(--text-soft)] max-w-2xl mx-auto">

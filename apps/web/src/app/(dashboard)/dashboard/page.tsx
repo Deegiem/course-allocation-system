@@ -225,7 +225,7 @@ export default function DashboardPage() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-lg font-semibold text-[#dbe6ff]">
+                      <h3 className="text-lg font-semibold text-[#ffffff]">
                         Allocate Course Manually
                       </h3>
                       <ArrowRight className="h-4 w-4 text-[#aeb9d4] transition group-hover:translate-x-0.5 group-hover:text-white" />
@@ -249,7 +249,7 @@ export default function DashboardPage() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-lg font-semibold text-[#6ef2bb]">
+                      <h3 className="text-lg font-semibold text-[#ffffff]">
                         Run Auto Allocation
                       </h3>
                       <ArrowRight className="h-4 w-4 text-[#8ed9bc] transition group-hover:translate-x-0.5 group-hover:text-[#6ef2bb]" />
@@ -264,22 +264,22 @@ export default function DashboardPage() {
 
               <Link
                 href="/reports"
-                className="group block rounded-2xl border border-white/10 bg-[#202c45] p-5 transition hover:border-white/15 hover:bg-[#26324c]"
+                className="group block rounded-md border border-emerald-500/20 bg-[#163743] p-5 transition hover:border-emerald-400/30 hover:bg-[#19404d]"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#31415f] text-[#dbe6ff]">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-[#215161] text-[#6ef2bb]">
                     <FileText className="h-5 w-5" />
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-lg font-semibold text-[#dbe6ff]">
+                      <h3 className="text-lg font-semibold text-[#ffffff]">
                         Generate Report
                       </h3>
-                      <ArrowRight className="h-4 w-4 text-[#aeb9d4] transition group-hover:translate-x-0.5 group-hover:text-white" />
+                      <ArrowRight className="h-4 w-4 text-[#aeb9d4] transition group-hover:translate-x-0.5 group-hover:text-[#6ef2bb]" />
                     </div>
 
-                    <p className="mt-1 text-sm text-[#c2cee8]">
+                    <p className="mt-1 text-sm text-[#c2e8d8]">
                       Export allocation status for stakeholders
                     </p>
                   </div>
