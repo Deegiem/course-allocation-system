@@ -32,12 +32,36 @@ router.get('/:key', async (req, res) => {
 // Update policy
 router.put('/:key', async (req, res) => {
   try {
-    const { value } = req.body;
+    const { key } = req.params;
+    let { value } = req.body;
+
+    // Convert value to JSON string for storage
+    // This handles boolean, number, object, and string values
+    if (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'object') {
+      value = JSON.stringify(value);
+    } else if (typeof value === 'string') {
+      // Check if it's already a valid JSON string
+      try {
+        JSON.parse(value);
+        // It's valid JSON, keep as is
+      } catch {
+        // Not valid JSON, stringify it
+        value = JSON.stringify(value);
+      }
+    }
+
     const policy = await prisma.policy.update({
-      where: { key: req.params.key },
+      where: { key },
       data: { value }
     });
-    return res.json({ success: true, data: policy });
+
+    // Parse the value back for the response
+    const responseData = {
+      ...policy,
+      value: JSON.parse(policy.value)
+    };
+
+    return res.json({ success: true, data: responseData });
   } catch (error) {
     return res.status(500).json({ success: false, error: (error as Error).message });
   }

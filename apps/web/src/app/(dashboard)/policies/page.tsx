@@ -81,7 +81,7 @@ function getHumanReadableValue(key: string, value: any): string {
     return `${parsedValue} hours`;
   }
   if (key === 'allowOverride' || key === 'specializationStrictMode' || key === 'autoAllocationEnabled') {
-    return parsedValue ? 'Enabled ✅' : 'Disabled ❌';
+    return parsedValue ? 'Enabled' : 'Disabled';
   }
   if (key === 'weights') {
     const w = parsedValue;
