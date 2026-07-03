@@ -390,7 +390,7 @@ export default function PoliciesPage() {
                         </div>
                         <div className="flex items-end">
                           <div className="w-full p-3 rounded-lg text-center text-sm font-medium" style={{ backgroundColor: isBalanced ? '#dcfce7' : '#fee2e2', color: isBalanced ? '#166534' : '#991b1b' }}>
-                            Total: {totalWeight}% {isBalanced ? '✅ Balanced' : '⚠️ Must sum to 100%'}
+                            Total: {totalWeight}% {isBalanced ? 'Balanced' : '⚠️ Must sum to 100%'}
                           </div>
                         </div>
                       </div>
@@ -439,8 +439,8 @@ export default function PoliciesPage() {
                       <input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" placeholder="Enter hours..." />
                     ) : policy.key === 'allowOverride' || policy.key === 'specializationStrictMode' || policy.key === 'autoAllocationEnabled' ? (
                       <select value={editValue} onChange={(e) => setEditValue(e.target.value)} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
-                        <option value="true">✅ Enabled</option>
-                        <option value="false">❌ Disabled</option>
+                        <option value="true">Enabled</option>
+                        <option value="false">Disabled</option>
                       </select>
                     ) : (
                       <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
